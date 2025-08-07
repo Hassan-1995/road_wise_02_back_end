@@ -16,10 +16,22 @@ exports.getTripsByDriver = async (req, res) => {
     // const [rows] = await pool.query("SELECT * FROM trip WHERE driverId = ?", [
     const [rows] = await pool.query(
       `
-      SELECT trip.*, vehicle.makeModel
+      SELECT 
+        trip.*, -- all columns from Trip
+        driver.userId,
+        user.name,
+        vehicle.makeModel,
+        vehicle.registrationNumber,
+        dropoutassignment.storeId,
+        store.storeName
       FROM trip
-      JOIN vehicle ON trip.vehicleId = vehicle.id 
-      WHERE driverId = ?`,
+      JOIN driver ON trip.driverId = driver.id
+      JOIN user ON driver.userId = user.id
+      JOIN vehicle ON trip.vehicleId = vehicle.id
+      LEFT JOIN dropoutassignment ON dropoutassignment.tripId = trip.id
+      LEFT JOIN store ON dropoutassignment.storeId = store.id
+      WHERE trip.driverId = ?    
+      `,
       [driverId]
     );
     res.json(rows);
