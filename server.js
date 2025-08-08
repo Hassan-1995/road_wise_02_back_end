@@ -30,6 +30,9 @@ const liveDriverTracker = require("./liveTracker/driverLivePosition");
 
 const storeRoutes = require("./store/storeRoute");
 
+const optimisedPath = require("./path/optimisedPath");
+const statusOrEndtime = require("./path/status_endTime");
+
 // Register routes
 app.use("/api/driver", driverRoutes); // get all drivers
 app.use("/api/driver/id", driverByIDRoutes); // get driver by id
@@ -53,6 +56,9 @@ app.use("/api/vehicle/repair/maintenance", repairEntry); // insert repair log en
 app.use("/api/driver-live-position", liveDriverTracker); // get drivers live position
 
 app.use("/api/store", storeRoutes); // get all store
+
+app.use("/api/optimised-path", optimisedPath); // create optimised path
+app.use("/api/update-status-or-endtime", statusOrEndtime); // update status and endtime
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
