@@ -25,13 +25,16 @@ const vehicleByDriverID = require("./vehicle/vehicleByDriverID");
 const fuelEntry = require("./vehicle/fuelEntry");
 const serviceEntry = require("./vehicle/serviceEntry");
 const repairEntry = require("./vehicle/repairEntry");
+const vehicleMaintenanceRoute = require("./vehicleMaintenanceLog/vehicleMaintenanceRoute");
 
 const liveDriverTracker = require("./liveTracker/driverLivePosition");
 
 const storeRoutes = require("./store/storeRoute");
 
 const optimisedPath = require("./path/optimisedPath");
+const getOptimisedPath = require("./path/getOptimisedPath");
 const statusOrEndtime = require("./path/status_endTime");
+const actualPointPath = require("./path/actualPointPath");
 
 // Register routes
 app.use("/api/driver", driverRoutes); // get all drivers
@@ -52,13 +55,16 @@ app.use("/api/vehicle/driver/id", vehicleByDriverID); // get completed vehicle i
 app.use("/api/vehicle/fuel/maintenance", fuelEntry); // insert fuel log entry
 app.use("/api/vehicle/service/maintenance", serviceEntry); // insert service log entry
 app.use("/api/vehicle/repair/maintenance", repairEntry); // insert repair log entry
+app.use("/api/vehicle-maintenance", vehicleMaintenanceRoute); // get completed vehicle info including maintenance
 
 app.use("/api/driver-live-position", liveDriverTracker); // get drivers live position
 
 app.use("/api/store", storeRoutes); // get all store
 
 app.use("/api/optimised-path", optimisedPath); // create optimised path
+app.use("/api/get-optimised-path/trip", getOptimisedPath); // create optimised path
 app.use("/api/update-status-or-endtime", statusOrEndtime); // update status and endtime
+app.use("/api/actual-point-path", actualPointPath); // insert actual point path
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -1,5 +1,6 @@
 const pool = require("../db/client");
 
+// Create optimised path for a trip
 exports.createOptimisedPath = async (req, res) => {
   const path = req.body;
 
@@ -124,6 +125,99 @@ exports.updateTripStatusOrEndTime = async (req, res) => {
     });
   } catch (error) {
     console.error("Update trip failed:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+exports.insertActualPathPoint = async (req, res) => {
+  const point = req.body;
+
+  // Validate required fields
+  if (!point.tripId || !point.driverId || !point.latitude || !point.longitude) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Missing required fields: tripId, driverId, latitude, longitude.",
+    });
+  }
+
+  try {
+    const [result] = await pool.query(
+      `INSERT INTO actualpathpoint (
+        tripId,
+        driverId,
+        latitude,
+        longitude,
+        recordedAt,
+        sequence,
+        speed,
+        heading
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        point.tripId,
+        point.driverId,
+        point.latitude,
+        point.longitude,
+        point.recordedAt || new Date(),
+        point.sequence || null, // optional
+        point.speed || null, // optional
+        point.heading || null, // optional
+      ]
+    );
+
+    res.status(201).json({
+      success: true,
+      insertId: result.insertId,
+      message: "Actual path point recorded successfully.",
+    });
+  } catch (error) {
+    console.error("Insert actual path point failed:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+// Get optimised path for a trip
+exports.getOptimisedPath = async (req, res) => {
+  const { tripID } = req.params;
+
+  if (!tripID) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing required parameter: tripId.",
+    });
+  }
+
+  try {
+    const [rows] = await pool.query(
+      `SELECT tripId, optimisedPath, distanceKm, durationMinutes, 
+              startTime, endTime, status
+       FROM generatedpath
+       WHERE tripId = ?
+       LIMIT 1`,
+      [tripID]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No optimised path found for this trip.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: rows[0],
+    });
+  } catch (error) {
+    console.error("Fetch optimised path failed:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
