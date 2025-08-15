@@ -7,8 +7,11 @@ app.use(cors());
 app.use(express.json());
 
 // Importing routes
+const createDriver = require("./user/createDriver");
+
 const driverRoutes = require("./driver/driverRoute");
 const driverByIDRoutes = require("./driver/driverByID");
+const onboradDriver = require("./driver/onboarding");
 
 const tripRoutes = require("./trip/tripRoute");
 const tripByDriverRoutes = require("./trip/tripByDriver");
@@ -37,8 +40,11 @@ const statusOrEndtime = require("./path/status_endTime");
 const actualPointPath = require("./path/actualPointPath");
 
 // Register routes
+app.use("/api/new-user/driver", createDriver); // create new-driver in user table
+
 app.use("/api/driver", driverRoutes); // get all drivers
 app.use("/api/driver/id", driverByIDRoutes); // get driver by id
+app.use("/api/driver", onboradDriver); // create new-driver in driver table
 
 app.use("/api/trip", tripRoutes); // get all trips
 app.use("/api/trip/driver/id", tripByDriverRoutes); // get trips by driverID

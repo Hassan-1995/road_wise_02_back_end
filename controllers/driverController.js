@@ -44,3 +44,52 @@ exports.getDriverByID = async (req, res) => {
     res.status(500).json({ error: "Database error" });
   }
 };
+
+// ON HOLD
+exports.onboradDriver = async (req, res) => {
+  const driver = req.body;
+
+  if (!driver.userId || !driver.cnicNumber || !driver.licenseNumber) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing required fields: User-Id, CNIC and License-Number.",
+    });
+  }
+
+  try {
+    const [result] = await pool.query(
+      `INSERT INTO driver (
+        userId,
+        cnicNumber,
+        gender,
+        residenceArea,
+        licenseNumber,
+        status,
+        dateOfBirth,
+        createdAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        driver.userId,
+        driver.cnicNumber,
+        driver.gender || null,
+        driver.residenceArea || null,
+        driver.licenseNumber,
+        driver.status || "Pending",
+        driver.dateOfBirth || null,
+        new Date(), // createdAt
+      ]
+    );
+
+    res.status(201).json({
+      success: true,
+      insertId: result.insertId,
+    });
+  } catch (error) {
+    console.error("Insert new-driver entry failed:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
